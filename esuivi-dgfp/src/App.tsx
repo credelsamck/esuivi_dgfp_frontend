@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./services/auth";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Accueil from "./pages/public/Accueil";
@@ -24,6 +24,11 @@ export default function App() {
           <Route path="/connexion" element={<Connexion />} />
           <Route path="/inscription" element={<Inscription />} />
           <Route path="/connexion-personnel" element={<ConnexionPersonnel />} />
+
+          <Route
+            path="/agent"
+            element={<Navigate to="/agent/tableau-de-bord" replace />}
+          />
 
           <Route
             path="/agent/tableau-de-bord"
@@ -63,6 +68,10 @@ export default function App() {
 
           {/* Espace Gestionnaire */}
           <Route
+            path="/gestionnaire"
+            element={<Navigate to="/gestionnaire/tableau-de-bord" replace />}
+          />
+          <Route
             path="/gestionnaire/tableau-de-bord"
             element={
               <ProtectedRoute allowedRoles={["gestionnaire"]}>
@@ -89,6 +98,10 @@ export default function App() {
 
           {/* Espace Administrateur */}
           <Route
+            path="/admin"
+            element={<Navigate to="/admin/tableau-de-bord" replace />}
+          />
+          <Route
             path="/admin/tableau-de-bord"
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
@@ -104,6 +117,9 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+
+          {/* Toute URL inconnue redirige vers l'accueil */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
