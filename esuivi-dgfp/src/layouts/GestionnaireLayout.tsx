@@ -1,8 +1,7 @@
 import type { ReactNode } from "react";
 import { NavLink } from "react-router-dom";
-import { Home, Folder, AlertTriangle, HelpCircle, Shield } from "lucide-react";
+import { Home, Folder, AlertTriangle, HelpCircle } from "lucide-react";
 import Logo from "../components/Logo";
-import { useAuth } from "../services/auth";
 
 const NAV_ITEMS = [
   { to: "/gestionnaire/tableau-de-bord", label: "Tableau de bord", icon: Home },
@@ -19,9 +18,6 @@ export default function GestionnaireLayout({
 }: {
   children: ReactNode;
 }) {
-  const { role } = useAuth();
-  const isAdmin = role === "admin";
-
   return (
     <div className="min-h-screen bg-white">
       <header className="border-b border-slate-200 bg-white">
@@ -61,21 +57,6 @@ export default function GestionnaireLayout({
                 {item.label}
               </NavLink>
             ))}
-            {isAdmin && (
-              <NavLink
-                to="/admin/tableau-de-bord"
-                className={({ isActive }) =>
-                  `flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors ${
-                    isActive
-                      ? "bg-navy-950 text-white"
-                      : "text-slate-600 hover:bg-slate-100"
-                  }`
-                }
-              >
-                <Shield className="h-4 w-4" />
-                Administration
-              </NavLink>
-            )}
           </nav>
         </aside>
 
