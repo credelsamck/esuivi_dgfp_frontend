@@ -4,6 +4,7 @@ import AuthSplitLayout from "../../layouts/AuthSplitLayout";
 import Input from "../../components/Input";
 import Button from "../../components/Button";
 import api from "../../services/api";
+import { extraireErreur } from "../../services/errors";
 import { useAuth } from "../../services/auth";
 import type { LoginResponse } from "../../types/api";
 
@@ -27,7 +28,7 @@ export default function Connexion() {
       login(data.user, data.token, "agent");
       navigate("/agent/tableau-de-bord");
     } catch (err: any) {
-      setError(err.response?.data?.message || "Identifiants incorrects.");
+      setError(extraireErreur(err, "Identifiants incorrects."));
     } finally {
       setLoading(false);
     }

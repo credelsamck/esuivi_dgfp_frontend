@@ -1,8 +1,14 @@
 // Extrait un message d'erreur lisible depuis une réponse d'erreur axios/Laravel.
-// Gère à la fois le format 422 ({ errors: { champ: ["message"] } })
-// et le format simple ({ message: "..." }).
+// Gère le format 422 ({ errors: { champ: ["message"] } }), le format simple
+// ({ message: "..." }), et le cas où le backend est injoignable (pas de réponse du tout).
 export function extraireErreur(err: any, messageParDefaut: string): string {
-  const data = err?.response?.data;
+  // Aucune réponse reçue = le backend n'est pas joignable (serveur arrêté,
+  // mauvaise URL dans VITE_API_BASE_URL, ou requête bloquée par CORS).
+  if (!err?.response) {
+    return "Impossible de contacter le serveur. Vérifiez que le backend est démarré et que l'URL de l'API est correcte (VITE_API_BASE_URL).";
+  }
+
+  const data = err.response.data;
 
   if (data?.errors) {
     const premiereErreur = Object.values(data.errors)[0];
