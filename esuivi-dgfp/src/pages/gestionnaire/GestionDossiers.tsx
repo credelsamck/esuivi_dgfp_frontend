@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
+import { Plus } from "lucide-react";
 import GestionnaireLayout from "../../layouts/GestionnaireLayout";
 import Modal from "../../components/Modal";
 import Button from "../../components/Button";
@@ -6,6 +7,7 @@ import { DossierStatutBadge } from "../../components/StatutBadge";
 import api from "../../services/api";
 import { extraireErreur } from "../../services/errors";
 import type {
+  Agent,
   Dossier,
   PaginatedResponse,
   StatutDossier,
@@ -34,6 +36,14 @@ export default function GestionDossiers() {
     "numerisation"
   );
   const [enregistrement, setEnregistrement] = useState(false);
+
+  // --- Ajout d'un dossier ---
+  const [modalAjoutOuverte, setModalAjoutOuverte] = useState(false);
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [agentId, setAgentId] = useState("");
+  const [typeDemande, setTypeDemande] = useState("");
+  const [erreurAjout, setErreurAjout] = useState("");
+  const [ajoutEnCours, setAjoutEnCours] = useState(false);
 
   const charger = () => {
     setLoading(true);
@@ -80,14 +90,62 @@ export default function GestionDossiers() {
     }
   };
 
+  const ouvrirModalAjout = () => {
+    setAgentId("");
+    setTypeDemande("");
+    setErreurAjout("");
+    setModalAjoutOuverte(true);
+
+    if (agents.length === 0) {
+      api
+        .get<Agent[]>("/gestionnaire/agents")
+        .then((res) => setAgents(res.data))
+        .catch(() =>
+          setErreurAjout("Impossible de charger la liste des agents.")
+        );
+    }
+  };
+
+  const soumettreAjout = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!agentId) {
+      setErreurAjout("Veuillez sélectionner un agent.");
+      return;
+    }
+
+    setAjoutEnCours(true);
+    setErreurAjout("");
+    try {
+      await api.post("/gestionnaire/dossiers", {
+        user_id: agentId,
+        type_demande: typeDemande,
+      });
+      setModalAjoutOuverte(false);
+      setPage(1);
+      charger();
+    } catch (err: any) {
+      setErreurAjout(extraireErreur(err, "Impossible de créer le dossier."));
+    } finally {
+      setAjoutEnCours(false);
+    }
+  };
+
   return (
     <GestionnaireLayout>
-      <h1 className="text-3xl font-bold text-navy-950">
-        Gestion des dossiers
-      </h1>
-      <p className="mt-1 text-slate-500">
-        Consultez, filtrez et mettez à jour le statut des dossiers.
-      </p>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-navy-950">
+            Gestion des dossiers
+          </h1>
+          <p className="mt-1 text-slate-500">
+            Consultez, filtrez et mettez à jour le statut des dossiers.
+          </p>
+        </div>
+        <Button onClick={ouvrirModalAjout}>
+          <Plus className="h-4 w-4" />
+          Ajouter un dossier
+        </Button>
+      </div>
 
       <div className="mt-6 flex flex-wrap gap-3">
         <input
@@ -201,6 +259,7 @@ export default function GestionDossiers() {
         </div>
       )}
 
+      {/* Modal changement de statut */}
       <Modal
         open={!!dossierSelectionne}
         onClose={() => setDossierSelectionne(null)}
@@ -230,6 +289,72 @@ export default function GestionDossiers() {
             {enregistrement ? "Enregistrement…" : "Enregistrer"}
           </Button>
         </div>
+      </Modal>
+
+      {/* Modal ajout de dossier */}
+      <Modal
+        open={modalAjoutOuverte}
+        onClose={() => setModalAjoutOuverte(false)}
+        title="Ajouter un dossier"
+      >
+        <form onSubmit={soumettreAjout} className="flex flex-col gap-4">
+          {erreurAjout && (
+            <p className="rounded-lg bg-red-50 px-4 py-2 text-sm text-red-600">
+              {erreurAjout}
+            </p>
+          )}
+
+          <div>
+            <label className="text-sm font-medium text-slate-800">
+              Agent concerné <span className="text-red-500">*</span>
+            </label>
+            <select
+              className="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-navy-950 focus:ring-2 focus:ring-navy-950/10"
+              value={agentId}
+              onChange={(e) => setAgentId(e.target.value)}
+            >
+              <option value="">Sélectionnez un agent</option>
+              {agents.map((agent) => (
+                <option key={agent.id} value={agent.id}>
+                  {agent.prenom} {agent.nom}
+                  {agent.matricule ? ` — ${agent.matricule}` : ""}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium text-slate-800">
+              Type de demande <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              required
+              placeholder="Ex : Avancement de grade"
+              className="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-navy-950 focus:ring-2 focus:ring-navy-950/10"
+              value={typeDemande}
+              onChange={(e) => setTypeDemande(e.target.value)}
+            />
+          </div>
+
+          <p className="text-xs text-slate-400">
+            Le numéro de dossier est généré automatiquement. Le statut initial
+            sera "Numérisation".
+          </p>
+
+          <div className="mt-2 flex justify-end gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setModalAjoutOuverte(false)}
+            >
+              Annuler
+            </Button>
+            <Button type="submit" disabled={ajoutEnCours}>
+              {ajoutEnCours ? "Création…" : "Créer le dossier"}
+            </Button>
+          </div>
+        </form>
       </Modal>
     </GestionnaireLayout>
   );

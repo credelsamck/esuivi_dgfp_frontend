@@ -9,11 +9,14 @@ import TableauDeBordAgent from "./pages/agent/TableauDeBord";
 import MesDossiers from "./pages/agent/MesDossiers";
 import NouvelleReclamation from "./pages/agent/NouvelleReclamation";
 import ConfirmationReclamation from "./pages/agent/ConfirmationReclamation";
+import ProfilAgent from "./pages/agent/Profil";
 import TableauDeBordGestionnaire from "./pages/gestionnaire/TableauDeBord";
 import GestionDossiers from "./pages/gestionnaire/GestionDossiers";
 import GestionReclamations from "./pages/gestionnaire/GestionReclamations";
+import ProfilGestionnaire from "./pages/gestionnaire/Profil";
 import TableauDeBordAdmin from "./pages/admin/TableauDeBord";
 import GestionUtilisateurs from "./pages/admin/GestionUtilisateurs";
+import ProfilAdmin from "./pages/admin/Profil";
 
 export default function App() {
   return (
@@ -66,6 +69,15 @@ export default function App() {
             }
           />
 
+          <Route
+            path="/agent/profil"
+            element={
+              <ProtectedRoute allowedRoles={["agent"]}>
+                <ProfilAgent />
+              </ProtectedRoute>
+            }
+          />
+
           {/* Espace Gestionnaire */}
           <Route
             path="/gestionnaire"
@@ -95,6 +107,14 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/gestionnaire/profil"
+            element={
+              <ProtectedRoute allowedRoles={["gestionnaire"]}>
+                <ProfilGestionnaire />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Espace Administrateur */}
           <Route
@@ -114,6 +134,14 @@ export default function App() {
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
                 <GestionUtilisateurs />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/profil"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <ProfilAdmin />
               </ProtectedRoute>
             }
           />

@@ -76,6 +76,13 @@ export interface AdminDashboard {
   comptes_inactifs: number;
 }
 
+export interface Agent {
+  id: number;
+  nom: string;
+  prenom: string;
+  matricule?: string;
+}
+
 export const ETAPES_DOSSIER: { key: StatutDossier; label: string }[] = [
   { key: "numerisation", label: "Numérisation" },
   { key: "indexation", label: "Indexation" },

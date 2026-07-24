@@ -1,5 +1,6 @@
 import { createContext, useContext, useState } from "react";
 import type { ReactNode } from "react";
+import api from "./api";
 import type { User, Role } from "../types/api";
 
 interface AuthContextValue {
@@ -7,7 +8,7 @@ interface AuthContextValue {
   role: Role | null;
   isAuthenticated: boolean;
   login: (user: User, token: string, role: Role) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -36,7 +37,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setRole(role);
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await api.post("/logout");
+    } catch {
+      // Le token est peut-être déjà expiré : on nettoie quand même côté client.
+    }
     localStorage.removeItem("token");
     localStorage.removeItem("role");
     localStorage.removeItem("user");
