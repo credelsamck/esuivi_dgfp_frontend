@@ -1,13 +1,7 @@
 import { useEffect, useState } from "react";
-import { User as UserIcon, Mail, Phone, Hash, ShieldCheck } from "lucide-react";
+import { User as UserIcon, Mail, Phone, Hash } from "lucide-react";
 import api from "../services/api";
 import type { User } from "../types/api";
-
-const ROLE_LABELS: Record<string, string> = {
-  agent: "Agent",
-  gestionnaire: "Gestionnaire DGFP",
-  admin: "Administrateur",
-};
 
 export default function ProfilContent() {
   const [user, setUser] = useState<User | null>(null);
@@ -57,11 +51,6 @@ export default function ProfilContent() {
     ...(user.telephone
       ? [{ icon: Phone, label: "Téléphone", value: user.telephone }]
       : []),
-    {
-      icon: ShieldCheck,
-      label: "Rôle",
-      value: ROLE_LABELS[user.role] ?? user.role,
-    },
   ];
 
   return (
